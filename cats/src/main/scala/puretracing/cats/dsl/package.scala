@@ -26,7 +26,7 @@ class ChildSpanPartiallyApplied[F[_]] {
     M: Monad[F],
     E: Bracket[F, Throwable]
   ): F[A] = for {
-    parent <- tracing.currentSpan()
+    parent <- tracing.currentSpan
     span <- tracing.startChild(parent, operationName)
     richSpan = spanOps(tracing)(span)
     fa <- tracing.useSpanIn(span)(richSpan.tag(tags: _*) *> logic(richSpan)).guarantee(tracing.finish(span))
@@ -34,7 +34,7 @@ class ChildSpanPartiallyApplied[F[_]] {
 
   private def spanOps(tracer: Tracer[F])(span: tracer.Span)(implicit F: Applicative[F]) = new SpanOps[F] {
     def tag(tags: (String, TracingValue)*): F[Unit] =
-      tags.toList.traverse { case (k, v) => tracer.setTag(span, k, v) }.map(_ => ())
+      tags.toList.traverse { case (k, v) => tracer.setTag(span, k, v) }.void
 
     def log(fields: (String, TracingValue)*): F[Unit] = tracer.log(span, fields)
     def set(key: String, value: String): F[Unit] = tracer.setBaggageItem(span, key, value)

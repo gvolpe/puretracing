@@ -16,13 +16,21 @@ trait Tracer[F[_]] {
   def getBaggageItem(span: Span, key: String): F[Option[String]]
 }
 
+object Tracer {
+  def apply[F[_]](implicit ev: Tracer[F]): Tracer[F] = ev
+}
+
 /**
   * Deals with context propagation.
   * Low level, users should use cat's dsl
   */
 trait Propagation[F[_]] extends Tracer[F] { // F could be ReaderT[IO]
-  def currentSpan(): F[Span]
+  def currentSpan: F[Span]
   def useSpanIn[A](span: Span)(fa: F[A]): F[A]
+}
+
+object Propagation {
+  def apply[F[_]](implicit ev: Propagation[F]): Propagation[F] = ev
 }
 
 sealed trait TracingValue // Poor man's union types
