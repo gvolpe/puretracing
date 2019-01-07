@@ -1,10 +1,10 @@
 package puretracing.cats
 
-import cats.{Applicative, Monad}
-import cats.effect.{Bracket, IO}
+import cats.Applicative
+import cats.effect.Bracket
 import cats.effect.syntax.all._
-import cats.syntax.all._
 import cats.instances.list._
+import cats.syntax.all._
 
 import puretracing.api.{Propagation, Tracer, TracingValue}
 
@@ -23,7 +23,6 @@ class ChildSpanPartiallyApplied[F[_]] {
   def apply[A](operationName: String, tags: (String, TracingValue)*)(logic: SpanOps[F] => F[A])(
     implicit
     tracing: Propagation[F],
-    M: Monad[F],
     E: Bracket[F, Throwable]
   ): F[A] = for {
     parent <- tracing.currentSpan
